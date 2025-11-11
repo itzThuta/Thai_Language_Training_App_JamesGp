@@ -32,7 +32,7 @@ public class Server {
         });
 
         Gson gson = new Gson();
-        
+
         // --- NEW: GET /random returns a JSON number between 1..100 ---
         get("/random", (req, res) -> {
             int n = new Random().nextInt(100) + 1; // 1..100
