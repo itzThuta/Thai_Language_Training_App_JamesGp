@@ -1,31 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Welcome</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .container { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
-        h2 { color: #333; }
-        .username { font-weight: bold; color: #0077cc; }
-        button { padding: 8px 16px; background: #e74c3c; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #c0392b; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Welcome</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background:#fff; }
+    .container { max-width: 520px; margin: auto; padding: 24px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,.06); }
+    h2 { color: #333; margin-top: 0; }
+    .username { font-weight: 700; color: #0077cc; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; margin-top: 12px; }
+    button, a.btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; text-decoration:none; display:inline-block; }
+    .btn-primary { background:#0066ff; color:#fff; }
+    .btn-primary:hover { background:#0052cc; }
+    .btn-danger { background:#e74c3c; color:#fff; }
+    .btn-danger:hover { background:#c0392b; }
+    .btn-outline { background:#fff; color:#0066ff; border:1px solid #0066ff; }
+    .btn-outline:hover { background:#f0f6ff; }
+    .hidden { display:none; }
+
+    /* --- Card flip --- */
+    .stage { perspective:1000px; margin-top:16px; }
+    .card3d { width:100%; max-width:420px; height:220px; margin:0 auto; position:relative;
+              transform-style:preserve-3d; transition:transform .5s ease; }
+    .face { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+            padding:16px; border-radius:12px; border:1px solid #e7e7e7; background:#fff;
+            box-shadow:0 8px 18px rgba(0,0,0,.06); backface-visibility:hidden;
+            font-size:1.2rem; font-weight:600; color:#222; text-align:center; }
+    .back { transform:rotateY(180deg); }
+    .card3d.flipped { transform:rotateY(180deg); }
+
+    /* --- Learned badge --- */
+    .meta { display:flex; align-items:center; gap:14px; margin-top:12px; flex-wrap:wrap; }
+    .toggle { display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; }
+    .badge { display:inline-block; padding:4px 10px; border-radius:999px; font-size:.85rem; font-weight:700; }
+    .badge-gray { background:#eef0f3; color:#444; border:1px solid #d9dee3; }
+    .badge-green { background:#e8fbef; color:#177a3c; border:1px solid #b8e6c8; }
+    .muted { color:#666; font-size:.9rem; }
+    .hint { margin-top:8px; color:#555; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Welcome, <span class="username" id="username"></span>!</h2>
-        <!-- <button onclick="logout()">Draw a card</button> -->
-        <button onclick="logout()">Logout</button>
+  <div class="container">
+    <h2>Welcome, <span class="username" id="username">Guest</span>!</h2>
+
+    <!-- Guest view -->
+    <div id="guestActions">
+      <p class="hint">You’re not logged in. Please log in to draw a flashcard.</p>
+      <a class="btn btn-primary" href="login.html">Go to Login</a>
+      <a class="btn btn-outline" href="index.html">Back to Home</a>
     </div>
-    <script>
-        // Assume username is stored in localStorage after login
-        document.getElementById('username').textContent = localStorage.getItem('username') || 'Guest';
-        function logout() {
-            localStorage.removeItem('username');
-            localStorage.removeItem('token');
-            window.location.href = 'login.html';
+
+    <!-- User view -->
+    <div id="userActions" class="hidden">
+      <div class="row">
+        <button class="btn-primary" id="drawBtn">Next card</button>
+        <button class="btn-outline" id="flipBtn">Flip</button>
+        <button class="btn-danger" id="logoutBtn">Logout</button>
+      </div>
+
+      <div class="stage">
+        <div class="card3d" id="card3d">
+          <div class="face front" id="frontFace">Front</div>
+          <div class="face back"  id="backFace">Back</div>
+        </div>
+      </div>
+
+      <div class="meta">
+        <label class="toggle">
+          <input type="checkbox" id="learnedChk">
+          <span>Mark as learned</span>
+        </label>
+
+        <!-- NEW visible badge -->
+        <span id="learnedBadge" class="badge badge-gray">Not learned</span>
+
+        <span class="muted" id="status"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Check login status ---
+    const username = localStorage.getItem('username');
+    const usernameEl = document.getElementById('username');
+    const guestActions = document.getElementById('guestActions');
+    const userActions  = document.getElementById('userActions');
+
+    if (username) {
+      usernameEl.textContent = username;
+      guestActions.classList.add('hidden');
+      userActions.classList.remove('hidden');
+    } else {
+      usernameEl.textContent = 'Guest';
+      guestActions.classList.remove('hidden');
+      userActions.classList.add('hidden');
+    }
+
+    // --- Elements ---
+    const drawBtn   = document.getElementById('drawBtn');
+    const flipBtn   = document.getElementById('flipBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const card3d    = document.getElementById('card3d');
+    const frontFace = document.getElementById('frontFace');
+    const backFace  = document.getElementById('backFace');
+    const learnedChk= document.getElementById('learnedChk');
+    const learnedBadge = document.getElementById('learnedBadge');
+    const statusEl  = document.getElementById('status');
+
+    let currentCard = null;
+
+    function setStatus(msg){ statusEl.textContent = msg || ''; }
+
+    // --- Local learned tracking ---
+    const LEARNED_KEY = 'learnedCards';
+    function getLearnedMap() {
+      try { return JSON.parse(localStorage.getItem(LEARNED_KEY) || '{}'); }
+      catch { return {}; }
+    }
+    function setLearnedMap(map) {
+      localStorage.setItem(LEARNED_KEY, JSON.stringify(map));
+    }
+    function keyFor(card){ return `${card.front}|${card.back}`; }
+
+    // --- Update learned UI ---
+    function updateLearnedUI(isLearned) {
+      learnedChk.checked = !!isLearned;
+      if (isLearned) {
+        learnedBadge.textContent = "Learned";
+        learnedBadge.classList.remove("badge-gray");
+        learnedBadge.classList.add("badge-green");
+      } else {
+        learnedBadge.textContent = "Not learned";
+        learnedBadge.classList.remove("badge-green");
+        learnedBadge.classList.add("badge-gray");
+      }
+    }
+
+    // --- Load random card from backend ---
+    async function loadRandomCard() {
+      setStatus("Loading...");
+      card3d.classList.remove("flipped");
+      learnedChk.checked = false;
+      updateLearnedUI(false);
+
+      try {
+        const res = await fetch("/api/flashcards/random");
+        if (!res.ok) {
+          setStatus("Failed to load card: " + res.status);
+          return;
         }
-    </script>
+        const card = await res.json();
+        currentCard = card;
+        frontFace.textContent = card.front ?? "(no front)";
+        backFace.textContent = card.back ?? "(no back)";
+
+        // check local learned state
+        const map = getLearnedMap();
+        updateLearnedUI(!!map[keyFor(card)]);
+        setStatus("");
+      } catch (e) {
+        setStatus("Network error: " + (e.message || e));
+      }
+    }
+
+    // --- Flip card animation ---
+    flipBtn?.addEventListener("click", () => card3d.classList.toggle("flipped"));
+
+    // --- Mark as learned ---
+    learnedChk?.addEventListener("change", () => {
+      if (!currentCard) return;
+      const map = getLearnedMap();
+      const k = keyFor(currentCard);
+      if (learnedChk.checked) {
+        map[k] = true;
+        setStatus("Marked as learned");
+      } else {
+        delete map[k];
+        setStatus("Unmarked as learned");
+      }
+      setLearnedMap(map);
+      updateLearnedUI(learnedChk.checked);
+    });
+
+    // --- Draw next card ---
+    drawBtn?.addEventListener("click", loadRandomCard);
+
+    // --- Logout ---
+    logoutBtn?.addEventListener("click", () => {
+      localStorage.removeItem("username");
+      localStorage.removeItem("token");
+      guestActions.classList.remove("hidden");
+      userActions.classList.add("hidden");
+      usernameEl.textContent = "Guest";
+      setStatus("");
+    });
+
+    // --- Auto load first card if logged in ---
+    if (username) loadRandomCard();
+  </script>
 </body>
 </html>
