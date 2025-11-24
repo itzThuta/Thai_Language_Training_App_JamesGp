@@ -2,42 +2,256 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Welcome</title>
+  <title>Thai Flashcards | Welcome</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; background:#fff; }
-    .container { max-width: 520px; margin: auto; padding: 24px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,.06); }
-    h2 { color: #333; margin-top: 0; }
-    .username { font-weight: 700; color: #0077cc; }
-    .row { display:flex; gap:12px; flex-wrap:wrap; margin-top: 12px; }
-    button, a.btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; text-decoration:none; display:inline-block; }
-    .btn-primary { background:#0066ff; color:#fff; }
-    .btn-primary:hover { background:#0052cc; }
-    .btn-danger { background:#e74c3c; color:#fff; }
-    .btn-danger:hover { background:#c0392b; }
-    .btn-outline { background:#fff; color:#0066ff; border:1px solid #0066ff; }
-    .btn-outline:hover { background:#f0f6ff; }
-    .hidden { display:none; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-    /* --- Card flip --- */
-    .stage { perspective:1000px; margin-top:16px; }
-    .card3d { width:100%; max-width:420px; height:220px; margin:0 auto; position:relative;
-              transform-style:preserve-3d; transition:transform .5s ease; }
-    .face { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-            padding:16px; border-radius:12px; border:1px solid #e7e7e7; background:#fff;
-            box-shadow:0 8px 18px rgba(0,0,0,.06); backface-visibility:hidden;
-            font-size:1.2rem; font-weight:600; color:#222; text-align:center; }
-    .back { transform:rotateY(180deg); }
-    .card3d.flipped { transform:rotateY(180deg); }
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-    /* --- Learned badge --- */
-    .meta { display:flex; align-items:center; gap:14px; margin-top:12px; flex-wrap:wrap; }
-    .toggle { display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; }
-    .badge { display:inline-block; padding:4px 10px; border-radius:999px; font-size:.85rem; font-weight:700; }
-    .badge-gray { background:#eef0f3; color:#444; border:1px solid #d9dee3; }
-    .badge-green { background:#e8fbef; color:#177a3c; border:1px solid #b8e6c8; }
-    .muted { color:#666; font-size:.9rem; }
-    .hint { margin-top:8px; color:#555; }
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h2 {
+      color: #2d3748;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .username {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Buttons */
+    button, a.btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+      font-family: 'Poppins', Arial, sans-serif;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-outline {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    .btn-outline:hover {
+      background: #f7f9ff;
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+      justify-content: center;
+    }
+
+    /* Card flip styles */
+    .stage {
+      perspective: 1200px;
+      margin: 30px 0;
+    }
+
+    .card3d {
+      width: 100%;
+      height: 280px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s ease;
+      cursor: pointer;
+    }
+
+    .face {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #f7f9ff 0%, #e8ebf9 100%);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      backface-visibility: hidden;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #2d3748;
+      text-align: center;
+      border: 3px solid #667eea;
+    }
+
+    .back {
+      transform: rotateY(180deg);
+      background: linear-gradient(135deg, #fff7ed 0%, #ffe8d1 100%);
+      border-color: #764ba2;
+    }
+
+    .card3d.flipped {
+      transform: rotateY(180deg);
+    }
+
+    /* Meta section */
+    .meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 25px;
+      padding-top: 25px;
+      border-top: 2px solid #e2e8f0;
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.95rem;
+      color: #4a5568;
+      font-weight: 500;
+    }
+
+    .toggle input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: #667eea;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .badge-gray {
+      background: #edf2f7;
+      color: #4a5568;
+    }
+
+    .badge-green {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+
+    .status {
+      color: #718096;
+      font-size: 0.9rem;
+      font-style: italic;
+    }
+
+    /* Guest view */
+    #guestActions {
+      text-align: center;
+    }
+
+    .hint {
+      color: #718096;
+      font-size: 1rem;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Click hint */
+    .click-hint {
+      text-align: center;
+      color: #718096;
+      font-size: 0.9rem;
+      margin-top: 15px;
+      font-style: italic;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 30px 20px;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .card3d {
+        height: 240px;
+      }
+
+      .face {
+        font-size: 1.2rem;
+        padding: 20px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -46,25 +260,29 @@
 
     <!-- Guest view -->
     <div id="guestActions">
-      <p class="hint">You’re not logged in. Please log in to draw a flashcard.</p>
-      <a class="btn btn-primary" href="login.html">Go to Login</a>
-      <a class="btn btn-outline" href="index.html">Back to Home</a>
+      <p class="hint">You're not logged in. Please log in to access your flashcards and start learning Thai!</p>
+      <div class="row">
+        <a class="btn btn-primary" href="login.html">Go to Login</a>
+        <a class="btn btn-outline" href="index.html">Back to Home</a>
+      </div>
     </div>
 
     <!-- User view -->
     <div id="userActions" class="hidden">
       <div class="row">
-        <button class="btn-primary" id="drawBtn">Next card</button>
-        <button class="btn-outline" id="flipBtn">Flip</button>
-        <button class="btn-danger" id="logoutBtn">Logout</button>
+        <button class="btn-primary" id="drawBtn">📚 Next Card</button>
+        <button class="btn-outline" id="flipBtn">🔄 Flip</button>
+        <button class="btn-danger" id="logoutBtn">🚪 Logout</button>
       </div>
 
       <div class="stage">
         <div class="card3d" id="card3d">
-          <div class="face front" id="frontFace">Front</div>
-          <div class="face back"  id="backFace">Back</div>
+          <div class="face front" id="frontFace">Click "Next Card" to start</div>
+          <div class="face back" id="backFace">Back side</div>
         </div>
       </div>
+
+      <p class="click-hint">💡 Click the card or press "Flip" to reveal the answer</p>
 
       <div class="meta">
         <label class="toggle">
@@ -72,20 +290,18 @@
           <span>Mark as learned</span>
         </label>
 
-        <!-- NEW visible badge -->
         <span id="learnedBadge" class="badge badge-gray">Not learned</span>
-
-        <span class="muted" id="status"></span>
+        <span class="status" id="status"></span>
       </div>
     </div>
   </div>
 
   <script>
-    // --- Check login status ---
+    // Check login status
     const username = localStorage.getItem('username');
     const usernameEl = document.getElementById('username');
     const guestActions = document.getElementById('guestActions');
-    const userActions  = document.getElementById('userActions');
+    const userActions = document.getElementById('userActions');
 
     if (username) {
       usernameEl.textContent = username;
@@ -97,37 +313,46 @@
       userActions.classList.add('hidden');
     }
 
-    // --- Elements ---
-    const drawBtn   = document.getElementById('drawBtn');
-    const flipBtn   = document.getElementById('flipBtn');
+    // Elements
+    const drawBtn = document.getElementById('drawBtn');
+    const flipBtn = document.getElementById('flipBtn');
     const logoutBtn = document.getElementById('logoutBtn');
-    const card3d    = document.getElementById('card3d');
+    const card3d = document.getElementById('card3d');
     const frontFace = document.getElementById('frontFace');
-    const backFace  = document.getElementById('backFace');
-    const learnedChk= document.getElementById('learnedChk');
+    const backFace = document.getElementById('backFace');
+    const learnedChk = document.getElementById('learnedChk');
     const learnedBadge = document.getElementById('learnedBadge');
-    const statusEl  = document.getElementById('status');
+    const statusEl = document.getElementById('status');
 
     let currentCard = null;
 
-    function setStatus(msg){ statusEl.textContent = msg || ''; }
+    function setStatus(msg) {
+      statusEl.textContent = msg || '';
+    }
 
-    // --- Local learned tracking ---
+    // Local learned tracking
     const LEARNED_KEY = 'learnedCards';
     function getLearnedMap() {
-      try { return JSON.parse(localStorage.getItem(LEARNED_KEY) || '{}'); }
-      catch { return {}; }
+      try {
+        return JSON.parse(localStorage.getItem(LEARNED_KEY) || '{}');
+      } catch {
+        return {};
+      }
     }
+
     function setLearnedMap(map) {
       localStorage.setItem(LEARNED_KEY, JSON.stringify(map));
     }
-    function keyFor(card){ return `${card.front}|${card.back}`; }
 
-    // --- Update learned UI ---
+    function keyFor(card) {
+      return `${card.front}|${card.back}`;
+    }
+
+    // Update learned UI
     function updateLearnedUI(isLearned) {
       learnedChk.checked = !!isLearned;
       if (isLearned) {
-        learnedBadge.textContent = "Learned";
+        learnedBadge.textContent = "✓ Learned";
         learnedBadge.classList.remove("badge-gray");
         learnedBadge.classList.add("badge-green");
       } else {
@@ -137,25 +362,23 @@
       }
     }
 
-    // --- Load random card from backend ---
+    // Load random card from backend
     async function loadRandomCard() {
       setStatus("Loading...");
       card3d.classList.remove("flipped");
-      learnedChk.checked = false;
-      updateLearnedUI(false);
 
       try {
-        const res = await fetch("/api/flashcards/random");
+        const res = await fetch("/showrandcard");
         if (!res.ok) {
           setStatus("Failed to load card: " + res.status);
           return;
         }
         const card = await res.json();
         currentCard = card;
-        frontFace.textContent = card.front ?? "(no front)";
-        backFace.textContent = card.back ?? "(no back)";
+        frontFace.textContent = card.front || "(no front)";
+        backFace.textContent = card.back || "(no back)";
 
-        // check local learned state
+        // Check local learned state
         const map = getLearnedMap();
         updateLearnedUI(!!map[keyFor(card)]);
         setStatus("");
@@ -164,40 +387,48 @@
       }
     }
 
-    // --- Flip card animation ---
-    flipBtn?.addEventListener("click", () => card3d.classList.toggle("flipped"));
+    // Flip card animation (button click)
+    flipBtn?.addEventListener("click", () => {
+      card3d.classList.toggle("flipped");
+    });
 
-    // --- Mark as learned ---
+    // Flip card animation (card click)
+    card3d?.addEventListener("click", () => {
+      card3d.classList.toggle("flipped");
+    });
+
+    // Mark as learned
     learnedChk?.addEventListener("change", () => {
       if (!currentCard) return;
       const map = getLearnedMap();
       const k = keyFor(currentCard);
       if (learnedChk.checked) {
         map[k] = true;
-        setStatus("Marked as learned");
+        setStatus("✓ Marked as learned");
       } else {
         delete map[k];
-        setStatus("Unmarked as learned");
+        setStatus("Unmarked");
       }
       setLearnedMap(map);
       updateLearnedUI(learnedChk.checked);
     });
 
-    // --- Draw next card ---
+    // Draw next card
     drawBtn?.addEventListener("click", loadRandomCard);
 
-    // --- Logout ---
+    // Logout
     logoutBtn?.addEventListener("click", () => {
-      localStorage.removeItem("username");
-      localStorage.removeItem("token");
-      guestActions.classList.remove("hidden");
-      userActions.classList.add("hidden");
-      usernameEl.textContent = "Guest";
-      setStatus("");
+      if (confirm("Are you sure you want to logout?")) {
+        localStorage.removeItem("username");
+        localStorage.removeItem("token");
+        window.location.href = "index.html";
+      }
     });
 
-    // --- Auto load first card if logged in ---
-    if (username) loadRandomCard();
+    // Auto load first card if logged in
+    if (username) {
+      loadRandomCard();
+    }
   </script>
 </body>
 </html>

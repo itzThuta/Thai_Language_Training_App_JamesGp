@@ -11,18 +11,11 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Server {
     private static final Gson gson = new Gson();
 
-    // In-memory deck (10 sample cards)
+    // In-memory deck (3 sample cards)
     private static final List<Flashcard> FLASHCARDS = List.of(
             new Flashcard("ก - กอ ไก่", "ko kai – chicken"),
             new Flashcard("ข - ขอ ไข่", "kho khai – egg"),
-            new Flashcard("ฃ - ฃอ ขวด", "kho khuat – bottle"),
-            new Flashcard("ค - คอ ควาย", "kho khwai – buffalo"),
-            new Flashcard("ง - งอ งู", "ngo ngu – snake"),
-            new Flashcard("จ - จอ จาน", "cho chan – plate"),
-            new Flashcard("ฉ - ฉอ ฉิ่ง", "cho ching – cymbals"),
-            new Flashcard("ช - ชอ ช้าง", "cho chang – elephant"),
-            new Flashcard("ซ - ซอ โซ่", "so so – chain"),
-            new Flashcard("ฌ - ฌอ เฌอ", "cho choe – tree"));
+            new Flashcard("ฃ - ฃอ ขวด", "kho khuat – bottle"));
 
     public static void main(String[] args) {
         port(8080);
@@ -65,14 +58,14 @@ public class Server {
             }
         });
 
-        // ✅ NEW: get ALL flashcards
+        // Get ALL flashcards
         get("/api/flashcards", (req, res) -> {
             res.type("application/json");
             return gson.toJson(FLASHCARDS);
         });
 
-        // ✅ NEW: get ONE random flashcard
-        get("/api/flashcards/random", (req, res) -> {
+        // Get ONE random flashcard
+        get("/showrandcard", (req, res) -> {
             res.type("application/json");
             int i = ThreadLocalRandom.current().nextInt(FLASHCARDS.size());
             return gson.toJson(FLASHCARDS.get(i));
