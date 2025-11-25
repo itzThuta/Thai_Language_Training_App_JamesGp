@@ -19,8 +19,6 @@ This project is ideal for beginners exploring the Thai language or anyone who wa
 ## 📁 Project Structure
 ```
 root/
-│── james/
-│── StudentJson/
 │── webservices/
 │   │── src/main/java/org/global/academy/
 │       ├── Flashcard.java
@@ -34,10 +32,7 @@ root/
 │── mvnw.cmd
 │── pom.xml
 │── run.txt
-│── Flashcard.java
-│── LearnThai.java
 │── README.md
-│── Others
 ```
 
 All backend-related code and runnable components for the web interface are located inside the **webservices** folder.
@@ -121,12 +116,6 @@ Add your screenshots here:
 - Add user progress tracking
 - Add audio pronunciation
 - Build a GUI version (JavaFX or Swing)
-
----
-
-## 🤝 Contributing
-Contributions are welcome!  
-Open an issue or submit a pull request anytime.
 
 ---
 
