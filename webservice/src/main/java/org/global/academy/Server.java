@@ -7,15 +7,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class Server {
     private static final Gson gson = new Gson();
 
-    // In-memory deck (3 sample cards)
+    // In-memory deck (7 sample cards)
     private static final List<Flashcard> FLASHCARDS = List.of(
             new Flashcard("ก - กอ ไก่", "ko kai – chicken"),
             new Flashcard("ข - ขอ ไข่", "kho khai – egg"),
-            new Flashcard("ฃ - ฃอ ขวด", "kho khuat – bottle"));
+            new Flashcard("ฃ - ฃอ ขวด", "kho khuat – bottle"),
+            new Flashcard("ค - คอ ควาย", "kho khwai – buffalo"),
+            new Flashcard("ฅ - ฅอ คน", "kho khon – person"),
+            new Flashcard("ฆ - ฆอ ระฆัง", "kho ra-khang – bell"),
+            new Flashcard("ง - งอ งู", "ngo ngu – snake"));
 
     public static void main(String[] args) {
         port(8080);
@@ -64,11 +69,26 @@ public class Server {
             return gson.toJson(FLASHCARDS);
         });
 
-        // Get ONE random flashcard
-        get("/showrandcard", (req, res) -> {
+        // Get ONE random flashcard (excluding learned ones)
+        post("/showrandcard", (req, res) -> {
             res.type("application/json");
-            int i = ThreadLocalRandom.current().nextInt(FLASHCARDS.size());
-            return gson.toJson(FLASHCARDS.get(i));
+            
+            // Get learned card keys from request body
+            LearnedRequest learnedReq = gson.fromJson(req.body(), LearnedRequest.class);
+            List<String> learnedKeys = learnedReq.learnedKeys != null ? learnedReq.learnedKeys : List.of();
+            
+            // Filter out learned cards
+            List<Flashcard> availableCards = FLASHCARDS.stream()
+                .filter(card -> !learnedKeys.contains(card.getFront() + "|" + card.getBack()))
+                .collect(Collectors.toList());
+            
+            if (availableCards.isEmpty()) {
+                res.status(404);
+                return gson.toJson(new ErrorResponse("All cards have been learned!"));
+            }
+            
+            int i = ThreadLocalRandom.current().nextInt(availableCards.size());
+            return gson.toJson(availableCards.get(i));
         });
 
         // Health check
@@ -96,5 +116,9 @@ public class Server {
         ErrorResponse(String e) {
             error = e;
         }
+    }
+    
+    static class LearnedRequest {
+        List<String> learnedKeys;
     }
 }

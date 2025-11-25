@@ -104,6 +104,16 @@
       transform: translateY(-2px);
     }
 
+    .btn-warning {
+      background: #f39c12;
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background: #e67e22;
+      transform: translateY(-2px);
+    }
+
     .row {
       display: flex;
       gap: 12px;
@@ -234,6 +244,47 @@
       font-style: italic;
     }
 
+    /* Progress info */
+    .progress-info {
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f7fafc;
+      border-radius: 10px;
+      border: 2px solid #e2e8f0;
+    }
+
+    .progress-info .count {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .progress-info .label {
+      font-size: 0.9rem;
+      color: #718096;
+      margin-top: 5px;
+    }
+
+    .completion-message {
+      text-align: center;
+      padding: 30px;
+      background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+      border-radius: 16px;
+      margin: 20px 0;
+    }
+
+    .completion-message h3 {
+      color: #22543d;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    .completion-message p {
+      color: #276749;
+      font-size: 1rem;
+    }
+
     @media (max-width: 600px) {
       .container {
         padding: 30px 20px;
@@ -269,9 +320,22 @@
 
     <!-- User view -->
     <div id="userActions" class="hidden">
+      <!-- Progress tracker -->
+      <div class="progress-info">
+        <div class="count" id="progressCount">0 / 7</div>
+        <div class="label">Cards Learned</div>
+      </div>
+
+      <!-- Completion message (hidden by default) -->
+      <div id="completionMessage" class="completion-message hidden">
+        <h3>🎉 Congratulations!</h3>
+        <p>You've learned all the cards! Click "Restart Progress" to practice again.</p>
+      </div>
+
       <div class="row">
         <button class="btn-primary" id="drawBtn">📚 Next Card</button>
         <button class="btn-outline" id="flipBtn">🔄 Flip</button>
+        <button class="btn-warning" id="restartBtn">🔄 Restart Progress</button>
         <button class="btn-danger" id="logoutBtn">🚪 Logout</button>
       </div>
 
@@ -297,6 +361,8 @@
   </div>
 
   <script>
+    const TOTAL_CARDS = 7;
+
     // Check login status
     const username = localStorage.getItem('username');
     const usernameEl = document.getElementById('username');
@@ -317,12 +383,15 @@
     const drawBtn = document.getElementById('drawBtn');
     const flipBtn = document.getElementById('flipBtn');
     const logoutBtn = document.getElementById('logoutBtn');
+    const restartBtn = document.getElementById('restartBtn');
     const card3d = document.getElementById('card3d');
     const frontFace = document.getElementById('frontFace');
     const backFace = document.getElementById('backFace');
     const learnedChk = document.getElementById('learnedChk');
     const learnedBadge = document.getElementById('learnedBadge');
     const statusEl = document.getElementById('status');
+    const progressCount = document.getElementById('progressCount');
+    const completionMessage = document.getElementById('completionMessage');
 
     let currentCard = null;
 
@@ -348,6 +417,28 @@
       return `${card.front}|${card.back}`;
     }
 
+    function getLearnedKeys() {
+      const map = getLearnedMap();
+      return Object.keys(map).filter(k => map[k]);
+    }
+
+    function updateProgress() {
+      const learnedCount = getLearnedKeys().length;
+      progressCount.textContent = `${learnedCount} / ${TOTAL_CARDS}`;
+      
+      if (learnedCount >= TOTAL_CARDS) {
+        completionMessage.classList.remove('hidden');
+        drawBtn.disabled = true;
+        drawBtn.style.opacity = '0.5';
+        drawBtn.style.cursor = 'not-allowed';
+      } else {
+        completionMessage.classList.add('hidden');
+        drawBtn.disabled = false;
+        drawBtn.style.opacity = '1';
+        drawBtn.style.cursor = 'pointer';
+      }
+    }
+
     // Update learned UI
     function updateLearnedUI(isLearned) {
       learnedChk.checked = !!isLearned;
@@ -362,17 +453,35 @@
       }
     }
 
-    // Load random card from backend
+    // Load random card from backend (excluding learned ones)
     async function loadRandomCard() {
       setStatus("Loading...");
       card3d.classList.remove("flipped");
 
       try {
-        const res = await fetch("/showrandcard");
+        const learnedKeys = getLearnedKeys();
+        
+        const res = await fetch("/showrandcard", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ learnedKeys })
+        });
+        
         if (!res.ok) {
+          if (res.status === 404) {
+            const error = await res.json();
+            setStatus(error.error);
+            frontFace.textContent = "🎉 All cards learned!";
+            backFace.textContent = "Click 'Restart Progress' to practice again";
+            updateProgress();
+            return;
+          }
           setStatus("Failed to load card: " + res.status);
           return;
         }
+        
         const card = await res.json();
         currentCard = card;
         frontFace.textContent = card.front || "(no front)";
@@ -382,6 +491,7 @@
         const map = getLearnedMap();
         updateLearnedUI(!!map[keyFor(card)]);
         setStatus("");
+        updateProgress();
       } catch (e) {
         setStatus("Network error: " + (e.message || e));
       }
@@ -411,10 +521,25 @@
       }
       setLearnedMap(map);
       updateLearnedUI(learnedChk.checked);
+      updateProgress();
     });
 
     // Draw next card
     drawBtn?.addEventListener("click", loadRandomCard);
+
+    // Restart progress
+    restartBtn?.addEventListener("click", () => {
+      if (confirm("Are you sure you want to restart your progress? This will reset all learned cards.")) {
+        localStorage.removeItem(LEARNED_KEY);
+        updateProgress();
+        setStatus("Progress reset!");
+        frontFace.textContent = "Click 'Next Card' to start";
+        backFace.textContent = "Back side";
+        card3d.classList.remove("flipped");
+        currentCard = null;
+        updateLearnedUI(false);
+      }
+    });
 
     // Logout
     logoutBtn?.addEventListener("click", () => {
@@ -427,6 +552,7 @@
 
     // Auto load first card if logged in
     if (username) {
+      updateProgress();
       loadRandomCard();
     }
   </script>
