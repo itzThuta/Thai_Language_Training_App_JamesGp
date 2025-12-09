@@ -1,0 +1,9 @@
+# macOS Finder files
+.DS_Store
+**/.DS_Store
+
+# Maven build output
+target/
+
+# Log files
+*.log
