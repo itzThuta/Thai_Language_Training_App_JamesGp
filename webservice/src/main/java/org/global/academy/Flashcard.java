@@ -1,4 +1,4 @@
-package org.global.academy;
+package org.global.academy; 
 
 public class Flashcard {
     private String front;
