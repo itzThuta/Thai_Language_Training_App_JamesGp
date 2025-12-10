@@ -1,18 +1,24 @@
 package org.global.academy;
 
-import static spark.Spark.*;
-import com.google.gson.Gson;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import com.google.gson.Gson;
+
+import static spark.Spark.before;
+import static spark.Spark.get;
+import static spark.Spark.options;
+import static spark.Spark.port;
+import static spark.Spark.post;
+import static spark.Spark.staticFiles;
+
 public class Server {
     private static final Gson gson = new Gson();
 
-    // In-memory deck (7 sample cards)
+    // In-memory deck 
     private static final List<Flashcard> FLASHCARDS = List.of(
             new Flashcard("ก - กอ ไก่", "ko kai – chicken"),
             new Flashcard("ข - ขอ ไข่", "kho khai – egg"),
@@ -20,7 +26,13 @@ public class Server {
             new Flashcard("ค - คอ ควาย", "kho khwai – buffalo"),
             new Flashcard("ฅ - ฅอ คน", "kho khon – person"),
             new Flashcard("ฆ - ฆอ ระฆัง", "kho ra-khang – bell"),
-            new Flashcard("ง - งอ งู", "ngo ngu – snake"));
+            new Flashcard("ง - งอ งู", "ngo ngu – snake"), 
+            new Flashcard("จ - จอ จาน", "cho chan – plate"),
+            new Flashcard("ฉ - ฉอ ฉิ่ง", "cho ching – small cymbals"),
+            new Flashcard("ช - ชอ ช้าง", "cho chang – elephant"),
+            new Flashcard("ซ - ซอ โซ่", "so so – chain"),
+            new Flashcard("ฌ - ฌอ เฌอ", "cho choe – tree"),
+            new Flashcard("ญ - ญอ หญิง", "yo ying – woman"));
 
     public static void main(String[] args) {
         port(8080);
